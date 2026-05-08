@@ -1,0 +1,385 @@
+{
+  "monedas": {
+    "Argentina": "ARS",
+    "Brasil": "BRL",
+    "Venezuela": "VES",
+    "Uruguay": "UYU",
+    "Perú": "PEN",
+    "Costa Rica": "CRC",
+    "Chile": "CLP",
+    "Colombia": "COP",
+    "Ecuador": "USD",
+    "México": "MXN",
+    "Honduras": "LPS",
+    "Paraguay": "PYG",
+    "Internacional": "USD"
+  },
+  "tasas_cambio": {
+    "Argentina": 1650,
+    "Brasil": 5.0,
+    "Venezuela": 660,
+    "Uruguay": 47,
+    "Perú": 4,
+    "Costa Rica": 540,
+    "Chile": 1100,
+    "Colombia": 4000,
+    "Ecuador": 1,
+    "México": 20,
+    "Honduras": 24,
+    "Paraguay": 6800,
+    "Internacional": 1
+  },
+  "plantilla_precios": {
+    "precios_base_usd": {
+      "11500_archivos": 30,
+      "36500_archivos": 58,
+      "86000_archivos": 85
+    },
+    "precios_descuento_usd": {
+      "11500_archivos": 22,
+      "36500_archivos": 43,
+      "86000_archivos": 63
+    },
+    "por_pais": {
+      "Argentina": {
+        "moneda": "ARS",
+        "tasa": 1650,
+        "minimo": 30000,
+        "confirmacion": "INMEDIATA",
+        "metodos": ["TRANSFERENCIAS"],
+        "datos_transferencia": {
+          "titular": "Tiago David Araguas",
+          "cedula": "40878642"
+        },
+        "precios_regulares": {
+          "11500_archivos": 49500,
+          "36500_archivos": 95700,
+          "86000_archivos": 140250
+        },
+        "precios_descuento": {
+          "11500_archivos": 36300,
+          "36500_archivos": 70950,
+          "86000_archivos": 103950
+        }
+      },
+      "Brasil": {
+        "moneda": "BRL",
+        "tasa": 5.0,
+        "minimo": 30,
+        "confirmacion": "INMEDIATA",
+        "metodos": ["PIX"],
+        "datos_pix": {
+          "titular": "PIX Brasil",
+          "tipo": "Chave aleatória"
+        },
+        "precios_regulares": {
+          "11500_archivos": 150,
+          "36500_archivos": 290,
+          "86000_archivos": 425
+        },
+        "precios_descuento": {
+          "11500_archivos": 110,
+          "36500_archivos": 215,
+          "86000_archivos": 315
+        }
+      },
+      "Venezuela": {
+        "moneda": "VES",
+        "tasa": 660,
+        "minimo": 2500,
+        "confirmacion": "9 AM a 1 AM",
+        "metodos": ["BANESCO", "PAGO MÓVIL"],
+        "datos_banesco": {
+          "titular": "Diego Jesús López Agreda",
+          "cedula": "27.118.940",
+          "cuenta": "01020624370100002874"
+        },
+        "datos_pagomovil": {
+          "cedula": "27.118.940",
+          "telefono": "0102-27118940"
+        },
+        "precios_regulares": {
+          "11500_archivos": 19800,
+          "36500_archivos": 38280,
+          "86000_archivos": 56100
+        },
+        "precios_descuento": {
+          "11500_archivos": 14520,
+          "36500_archivos": 28380,
+          "86000_archivos": 41580
+        }
+      },
+      "Uruguay": {
+        "moneda": "UYU",
+        "tasa": 47,
+        "minimo": 500,
+        "confirmacion": "9 AM a 12 AM",
+        "metodos": ["BANCO BROU", "PREX", "ITAÚ"],
+        "datos_brou": {
+          "titular": "Mery Tábarez",
+          "cuenta": "110633544-00001"
+        },
+        "datos_prex": {
+          "titular": "Nicolás Furtado",
+          "cuenta": "219428"
+        },
+        "datos_itau": {
+          "titular": "Nicolás Furtado",
+          "cuenta": "0771580"
+        },
+        "precios_regulares": {
+          "11500_archivos": 1410,
+          "36500_archivos": 2726,
+          "86000_archivos": 3995
+        },
+        "precios_descuento": {
+          "11500_archivos": 1034,
+          "36500_archivos": 2021,
+          "86000_archivos": 2961
+        }
+      },
+      "Perú": {
+        "moneda": "PEN",
+        "tasa": 4,
+        "minimo": 30,
+        "confirmacion": "9 AM a 1 AM",
+        "metodos": ["YAPE", "TRANSFERENCIAS"],
+        "datos_yape": {
+          "titular": "Sonya Mamani",
+          "telefono": "959858757"
+        },
+        "precios_regulares": {
+          "11500_archivos": 120,
+          "36500_archivos": 232,
+          "86000_archivos": 340
+        },
+        "precios_descuento": {
+          "11500_archivos": 88,
+          "36500_archivos": 172,
+          "86000_archivos": 252
+        }
+      },
+      "Costa Rica": {
+        "moneda": "CRC",
+        "tasa": 540,
+        "minimo": 3600,
+        "confirmacion": "INMEDIATA",
+        "metodos": ["BANCO DE COSTA RICA", "SINPE MÓVIL"],
+        "datos_banco": {
+          "titular": "Alexander Canales Sáenz",
+          "cuenta": "CR03015202001346215807"
+        },
+        "datos_sinpe": {
+          "numero": "8775 2888"
+        },
+        "precios_regulares": {
+          "11500_archivos": 16200,
+          "36500_archivos": 31320,
+          "86000_archivos": 45900
+        },
+        "precios_descuento": {
+          "11500_archivos": 11880,
+          "36500_archivos": 23220,
+          "86000_archivos": 34020
+        }
+      },
+      "Chile": {
+        "moneda": "CLP",
+        "tasa": 1100,
+        "minimo": 7000,
+        "confirmacion": "9 AM a 12 AM",
+        "metodos": ["BANCO BCI", "TRANSFERENCIA"],
+        "datos_bci": {
+          "titular": "Patricio Alejandro González Burgos",
+          "cuenta": "777020466904",
+          "rut": "20.466.904-k"
+        },
+        "precios_regulares": {
+          "11500_archivos": 33000,
+          "36500_archivos": 63800,
+          "86000_archivos": 93500
+        },
+        "precios_descuento": {
+          "11500_archivos": 24200,
+          "36500_archivos": 47300,
+          "86000_archivos": 69300
+        }
+      },
+      "Colombia": {
+        "moneda": "COP",
+        "tasa": 4000,
+        "minimo": 50000,
+        "confirmacion": "INMEDIATA",
+        "metodos": ["BANCOLOMBIA", "NEQUI"],
+        "datos_bancolombia": {
+          "titular": "Bancolombia",
+          "tipo": "Cuenta Corriente"
+        },
+        "datos_nequi": {
+          "tipo": "Billetera Digital"
+        },
+        "precios_regulares": {
+          "11500_archivos": 120000,
+          "36500_archivos": 232000,
+          "86000_archivos": 340000
+        },
+        "precios_descuento": {
+          "11500_archivos": 88000,
+          "36500_archivos": 172000,
+          "86000_archivos": 252000
+        }
+      },
+      "Ecuador": {
+        "moneda": "USD",
+        "tasa": 1,
+        "minimo": 20,
+        "confirmacion": "INMEDIATA",
+        "metodos": ["BANCO PICHINCHA", "BANCO GUAYAQUIL", "TRANSFERENCIA"],
+        "datos_pichincha": {
+          "titular": "Ecuador"
+        },
+        "datos_guayaquil": {
+          "titular": "Ecuador"
+        },
+        "precios_regulares": {
+          "11500_archivos": 30,
+          "36500_archivos": 58,
+          "86000_archivos": 85
+        },
+        "precios_descuento": {
+          "11500_archivos": 22,
+          "36500_archivos": 43,
+          "86000_archivos": 63
+        }
+      },
+      "México": {
+        "moneda": "MXN",
+        "tasa": 20,
+        "minimo": 200,
+        "confirmacion": "INMEDIATA",
+        "metodos": ["BANAMEX", "OXXO", "7ELEVEN"],
+        "datos_banamex": {
+          "titular": "Isaac López de la Garza",
+          "cuenta": "5204-1652-8449-9690",
+          "email": "nolasconsulting25@gmail.com",
+          "concepto_obligatorio": "coaching de league of legends"
+        },
+        "precios_regulares": {
+          "11500_archivos": 600,
+          "36500_archivos": 1160,
+          "86000_archivos": 1700
+        },
+        "precios_descuento": {
+          "11500_archivos": 440,
+          "36500_archivos": 860,
+          "86000_archivos": 1260
+        }
+      },
+      "Honduras": {
+        "moneda": "LPS",
+        "tasa": 24,
+        "minimo": 200,
+        "confirmacion": "INMEDIATA",
+        "metodos": ["BAC CREDOMATIC"],
+        "datos_bac": {
+          "titular": "BAC Honduras"
+        },
+        "precios_regulares": {
+          "11500_archivos": 720,
+          "36500_archivos": 1392,
+          "86000_archivos": 2040
+        },
+        "precios_descuento": {
+          "11500_archivos": 528,
+          "36500_archivos": 1032,
+          "86000_archivos": 1512
+        }
+      },
+      "Paraguay": {
+        "moneda": "PYG",
+        "tasa": 6800,
+        "minimo": 100000,
+        "confirmacion": "INMEDIATA",
+        "metodos": ["UENOBANK"],
+        "datos_uenobank": {
+          "titular": "UENOBANK Paraguay"
+        },
+        "precios_regulares": {
+          "11500_archivos": 204000,
+          "36500_archivos": 394400,
+          "86000_archivos": 578000
+        },
+        "precios_descuento": {
+          "11500_archivos": 149600,
+          "36500_archivos": 292400,
+          "86000_archivos": 428400
+        }
+      },
+      "Internacional": {
+        "moneda": "USD",
+        "tasa": 1,
+        "minimo": 20,
+        "confirmacion": "INMEDIATA",
+        "metodos": ["ZELLE", "VENMO", "WESTERN UNION", "PAYPAL", "SKRILL", "PAYONEER", "CRYPTO - USDT"],
+        "datos_zelle": {
+          "email": "nolasconsulting25@gmail.com",
+          "titular": "APEX CAR DETAILING LLC",
+          "concepto_obligatorio": "payment for coaching session",
+          "advertencia": "⚠️ SIN CONCEPTO = PAGO SE PIERDE"
+        },
+        "datos_venmo": {
+          "usuario": "venmo",
+          "nota": "Disponible en USA"
+        },
+        "datos_western_union": {
+          "nota": "Disponible globalmente"
+        },
+        "datos_paypal": {
+          "email": "paypal@business.com",
+          "nota": "Solo cuentas titulares"
+        },
+        "datos_skrill": {
+          "email": "skrill@business.com"
+        },
+        "datos_payoneer": {
+          "email": "payoneer@business.com"
+        },
+        "datos_crypto": {
+          "red": "Binance Smart Chain (BSC)",
+          "moneda": "USDT",
+          "wallet": "0x...",
+          "tasa": 0.95,
+          "confirmacion": "INMEDIATA"
+        },
+        "precios_regulares": {
+          "11500_archivos": 30,
+          "36500_archivos": 58,
+          "86000_archivos": 85
+        },
+        "precios_descuento": {
+          "11500_archivos": 22,
+          "36500_archivos": 43,
+          "86000_archivos": 63
+        }
+      }
+    }
+  },
+  "paises_aliases": {
+    "arg": "Argentina",
+    "br": "Brasil",
+    "ve": "Venezuela",
+    "ur": "Uruguay",
+    "pe": "Perú",
+    "cr": "Costa Rica",
+    "cl": "Chile",
+    "col": "Colombia",
+    "ec": "Ecuador",
+    "mx": "México",
+    "hn": "Honduras",
+    "py": "Paraguay",
+    "usa": "Internacional",
+    "us": "Internacional",
+    "eu": "Internacional",
+    "latam": "Internacional"
+  }
+}
