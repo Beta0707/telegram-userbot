@@ -9,34 +9,23 @@ import logging
 import os
 import json
 from dotenv import load_dotenv
+from anthropic import Anthropic
 
 from accounts import cargar_cuentas, conectar_cuenta, desconectar_todas
 from handlers import registrar_handler_texto, registrar_handler_media
 from database_completa import inicializar_bd
-from broadcast import worker_broadcast
-
-# Lazy import para Anthropic (evita problemas de httpcore)
-def get_ai_client(api_key):
-    from anthropic import Anthropic
-    return Anthropic(api_key=api_key)
 
 load_dotenv()
 
-# Crear carpeta de logs primero
-os.makedirs('logs', exist_ok=True)
-
 # ============= CONFIGURACIÓN DE LOGGING =============
-
-handlers = [logging.StreamHandler()]
-try:
-    handlers.append(logging.FileHandler('logs/userbot.log', encoding='utf-8'))
-except Exception:
-    pass
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=handlers
+    handlers=[
+        logging.FileHandler('logs/userbot.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
 )
 logger = logging.getLogger(__name__)
 
@@ -48,20 +37,9 @@ ANTHROPIC_KEY = os.getenv('ANTHROPIC_API_KEY', '')
 RECEPTOR_USER_ID = int(os.getenv('RECEPTOR_USER_ID', '0'))
 DB_PATH = os.getenv('DB_PATH', 'userbot_completo.db')
 
-# ============= BROADCAST (REENVÍO A GRUPOS) =============
-GROUP_MEDIA_ID = int(os.getenv('GROUP_MEDIA_ID', '-5006003164'))
-GROUP_LINK = os.getenv('GROUP_LINK', 'https://t.me/+lIHv-XxJiZ8xM2Ex')
-BROADCAST_COOLDOWN = int(os.getenv('BROADCAST_COOLDOWN_MINUTES', '5'))
-BROADCAST_WAIT = int(os.getenv('BROADCAST_WAIT_HOURS', '4'))
-ACCOUNT_OFFSETS = {
-    1: int(os.getenv('ACCOUNT_OFFSET_MINUTES_1', '0')),
-    2: int(os.getenv('ACCOUNT_OFFSET_MINUTES_2', '90')),
-    3: int(os.getenv('ACCOUNT_OFFSET_MINUTES_3', '180'))
-}
-
 # ============= CLIENTES Y SERVICIOS =============
 
-ai_client = None
+ai_client = Anthropic(api_key=ANTHROPIC_KEY)
 db = inicializar_bd(DB_PATH)
 
 # Estado compartido entre las 3 cuentas
@@ -87,28 +65,48 @@ async def mostrar_estadisticas(db):
         await asyncio.sleep(600)
 
         try:
-            stats = db.obtener_estadisticas_simples()
-            logger.info(
-                f"STATS | Usuarios: {stats['total_usuarios']} | "
-                f"Imagenes reenviadas: {stats['total_imagenes_reenviadas']}"
-            )
+            stats = db.obtener_estadisticas()
+            logger.info(f"""
+╔═══════════════════════════════════════════╗
+║         📊 ESTADÍSTICAS DEL BOT            ║
+╠═══════════════════════════════════════════╣
+║  👥 Total usuarios: {stats['total_usuarios']:>20} ║
+║  🌍 Países activos: {stats['paises_activos']:>21} ║
+║  📦 Órdenes totales: {stats['total_ordenes']:>19} ║
+║  ✅ Órdenes pagadas: {stats['ordenes_pagadas']:>19} ║
+║  ⏳ Órdenes pendientes: {stats['ordenes_pendientes']:>16} ║
+║  💰 Ventas USD: ${stats['ventas_total_usd']:>20.2f} ║
+║  💬 Conversaciones: {stats['total_conversaciones']:>19} ║
+╚═══════════════════════════════════════════╝
+""")
         except Exception as e:
             logger.error(f"Error obteniendo estadísticas: {e}")
 
 
+# ============= MENÚ INTERACTIVO =============
+
+def mostrar_menu():
+    """Muestra un menú al iniciar el bot"""
+    print("\n" + "=" * 60)
+    print("🤖 USERBOT MULTI-CUENTA CON IA ANTHROPIC")
+    print("=" * 60)
+    print("\n¿Qué deseas hacer?\n")
+    print("  1) Usar sesiones EXISTENTES (sin pedir códigos)")
+    print("  2) Agregar NUEVA CUENTA (pedir teléfono)")
+    print("  3) Salir\n")
+
+    while True:
+        opcion = input("Selecciona una opción (1, 2 o 3): ").strip()
+        if opcion in ['1', '2', '3']:
+            return opcion
+        print("❌ Opción inválida, intenta de nuevo\n")
 
 
 # ============= PUNTO DE ENTRADA =============
 
 
 async def main():
-    """Inicia el userbot multi-cuenta (auto-run, sin menú interactivo)"""
-
-    global ai_client
-
-    logger.info("=" * 60)
-    logger.info("🤖 USERBOT MULTI-CUENTA CON IA ANTHROPIC")
-    logger.info("=" * 60)
+    """Inicia el userbot multi-cuenta"""
 
     # Verificar credenciales críticas
     if not API_ID or not API_HASH or not ANTHROPIC_KEY:
@@ -116,37 +114,53 @@ async def main():
         logger.error(f"   TELEGRAM_API_ID: {'✅' if API_ID else '❌'}")
         logger.error(f"   TELEGRAM_API_HASH: {'✅' if API_HASH else '❌'}")
         logger.error(f"   ANTHROPIC_API_KEY: {'✅' if ANTHROPIC_KEY else '❌'}")
-        logger.info("⏳ Esperando a que se configuren las credenciales...")
-        await asyncio.sleep(60)
         return
 
     if not RECEPTOR_USER_ID:
-        logger.warning("⚠️ RECEPTOR_USER_ID no configurado - reenvío de comprobantes deshabilitado")
+        logger.error("❌ RECEPTOR_USER_ID no configurado en .env")
+        return
 
     # Crear carpeta de logs si no existe
     os.makedirs('logs', exist_ok=True)
 
-    # Inicializar cliente de Anthropic (lazy import)
-    try:
-        ai_client = get_ai_client(ANTHROPIC_KEY)
-        logger.info("✅ Cliente Anthropic inicializado")
-    except Exception as e:
-        logger.error(f"❌ Error inicializando Anthropic: {e}")
-        logger.info("⏳ Esperando que se resuelva el problema...")
-        await asyncio.sleep(60)
+    # Mostrar menú
+    opcion = mostrar_menu()
+
+    if opcion == '3':
+        print("❌ Saliendo...")
         return
 
-    # Cargar cuentas desde .env (usa sesiones existentes automáticamente)
+    logger.info("=" * 60)
+    logger.info("🤖 USERBOT MULTI-CUENTA CON IA ANTHROPIC")
+    logger.info("=" * 60)
+
+    # Cargar cuentas desde .env
     cuentas = cargar_cuentas(API_ID, API_HASH)
 
+    # Si el usuario eligió opción 2 (agregar nueva cuenta), pedir teléfono
+    if opcion == '2' and cuentas:
+        print("\n📱 AGREGAR NUEVA CUENTA")
+        print("Cuál cuenta deseas agregar?")
+        for cuenta in cuentas:
+            print(f"  - Cuenta {cuenta['numero']} ({cuenta['session_name']})")
+        numero_str = input("\nIngresa el número (1, 2 o 3): ").strip()
+        if numero_str in ['1', '2', '3']:
+            numero_idx = int(numero_str) - 1
+            if numero_idx < len(cuentas):
+                numero_telefono = input("Ingresa tu teléfono (+5491123456789): ").strip()
+                if numero_telefono.startswith('+'):
+                    cuentas[numero_idx]['phone'] = numero_telefono
+                    print(f"✅ Teléfono agregado: {numero_telefono}")
+                else:
+                    print("❌ Formato inválido, debe empezar con +")
+                    return
+
     if not cuentas:
-        logger.warning("⚠️ No hay cuentas configuradas en .env")
-        logger.info("   Configura TELEGRAM_PHONE_1, TELEGRAM_PHONE_2, TELEGRAM_PHONE_3 en .env")
-        logger.info("⏳ Esperando configuración...")
-        await asyncio.sleep(60)
+        logger.error("❌ No hay cuentas configuradas")
+        logger.error("   Configura TELEGRAM_PHONE_1, TELEGRAM_PHONE_2, TELEGRAM_PHONE_3 en .env")
         return
 
-    logger.info(f"📱 Intentando conectar {len(cuentas)} cuenta(s)...")
+    logger.info(f"📱 Cuentas a conectar: {len(cuentas)}")
 
     # Conectar todas las cuentas
     cuentas_activas = []
@@ -155,13 +169,10 @@ async def main():
         if ok:
             cuentas_activas.append(cuenta)
         else:
-            logger.warning(f"⚠️ Saltando cuenta {cuenta['numero']} (sesión no disponible)")
+            logger.warning(f"⚠️ Saltando cuenta {cuenta['numero']}")
 
     if not cuentas_activas:
-        logger.warning("⚠️ No se pudo conectar a ninguna cuenta")
-        logger.info("   Asegúrate de que los archivos .session existan y sean válidos")
-        logger.info("⏳ Esperando conexión...")
-        await asyncio.sleep(60)
+        logger.error("❌ No se pudo conectar a ninguna cuenta")
         return
 
     logger.info(f"✅ Conectado a {len(cuentas_activas)} cuenta(s)")
@@ -188,11 +199,7 @@ async def main():
             client=client,
             db=db,
             receptor_user_id=RECEPTOR_USER_ID,
-            nombre_sesion=session_name,
-            ai_client=ai_client,
-            config=CONFIG,
-            conversation_history=conversation_history,
-            user_message_times=user_message_times
+            nombre_sesion=session_name
         )
 
     # Cargar precios en BD si están en config
@@ -216,24 +223,6 @@ async def main():
             # Mostrar estadísticas cada 10 minutos
             mostrar_estadisticas(db)
         ]
-
-        # Agregar workers de broadcast para cada cuenta activa
-        for cuenta in cuentas_activas:
-            numero_cuenta = int(cuenta['numero'])
-            offset = ACCOUNT_OFFSETS.get(numero_cuenta, 0)
-            tasks.append(
-                worker_broadcast(
-                    client=cuenta['client'],
-                    account_number=numero_cuenta,
-                    initial_delay_minutes=offset,
-                    group_media_id=GROUP_MEDIA_ID,
-                    cooldown_minutes=BROADCAST_COOLDOWN,
-                    wait_hours=BROADCAST_WAIT,
-                    nombre_sesion=cuenta['session_name'],
-                    link_grupo=GROUP_LINK
-                )
-            )
-            logger.info(f"📤 Worker broadcast configurado para cuenta {numero_cuenta} (offset: {offset}min)")
 
         # Ejecutar todas las tareas en paralelo
         await asyncio.gather(*tasks)
