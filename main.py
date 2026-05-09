@@ -23,13 +23,16 @@ os.makedirs('logs', exist_ok=True)
 
 # ============= CONFIGURACIÓN DE LOGGING =============
 
+handlers = [logging.StreamHandler()]
+try:
+    handlers.append(logging.FileHandler('logs/userbot.log', encoding='utf-8'))
+except Exception:
+    pass
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/userbot.log', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
+    handlers=handlers
 )
 logger = logging.getLogger(__name__)
 
