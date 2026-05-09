@@ -14,6 +14,7 @@ from anthropic import Anthropic
 from accounts import cargar_cuentas, conectar_cuenta, desconectar_todas
 from handlers import registrar_handler_texto, registrar_handler_media
 from database_completa import inicializar_bd
+from broadcast import worker_broadcast
 
 load_dotenv()
 
@@ -36,6 +37,17 @@ API_HASH = os.getenv('TELEGRAM_API_HASH', '')
 ANTHROPIC_KEY = os.getenv('ANTHROPIC_API_KEY', '')
 RECEPTOR_USER_ID = int(os.getenv('RECEPTOR_USER_ID', '0'))
 DB_PATH = os.getenv('DB_PATH', 'userbot_completo.db')
+
+# ============= BROADCAST (REENVÍO A GRUPOS) =============
+GROUP_MEDIA_ID = int(os.getenv('GROUP_MEDIA_ID', '-5006003164'))
+GROUP_LINK = os.getenv('GROUP_LINK', 'https://t.me/+lIHv-XxJiZ8xM2Ex')
+BROADCAST_COOLDOWN = int(os.getenv('BROADCAST_COOLDOWN_MINUTES', '5'))
+BROADCAST_WAIT = int(os.getenv('BROADCAST_WAIT_HOURS', '4'))
+ACCOUNT_OFFSETS = {
+    1: int(os.getenv('ACCOUNT_OFFSET_MINUTES_1', '0')),
+    2: int(os.getenv('ACCOUNT_OFFSET_MINUTES_2', '90')),
+    3: int(os.getenv('ACCOUNT_OFFSET_MINUTES_3', '180'))
+}
 
 # ============= CLIENTES Y SERVICIOS =============
 
@@ -223,6 +235,24 @@ async def main():
             # Mostrar estadísticas cada 10 minutos
             mostrar_estadisticas(db)
         ]
+
+        # Agregar workers de broadcast para cada cuenta activa
+        for cuenta in cuentas_activas:
+            numero_cuenta = int(cuenta['numero'])
+            offset = ACCOUNT_OFFSETS.get(numero_cuenta, 0)
+            tasks.append(
+                worker_broadcast(
+                    client=cuenta['client'],
+                    account_number=numero_cuenta,
+                    initial_delay_minutes=offset,
+                    group_media_id=GROUP_MEDIA_ID,
+                    cooldown_minutes=BROADCAST_COOLDOWN,
+                    wait_hours=BROADCAST_WAIT,
+                    nombre_sesion=cuenta['session_name'],
+                    link_grupo=GROUP_LINK
+                )
+            )
+            logger.info(f"📤 Worker broadcast configurado para cuenta {numero_cuenta} (offset: {offset}min)")
 
         # Ejecutar todas las tareas en paralelo
         await asyncio.gather(*tasks)
