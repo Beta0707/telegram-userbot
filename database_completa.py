@@ -283,7 +283,7 @@ class DatabaseManager:
                               datos_pais.get('confirmacion', 'Inmediata')))
 
             conn.commit()
-            logger.info(f"✅ {c.total_changes} precios cargados en BD")
+            logger.info(f"✅ Precios cargados en BD")
         except Exception as e:
             logger.error(f"❌ Error cargando precios: {e}")
         finally:
@@ -547,6 +547,47 @@ class DatabaseManager:
         try:
             c.execute('SELECT DISTINCT pais FROM usuarios WHERE pais IS NOT NULL ORDER BY pais')
             return [row[0] for row in c.fetchall()]
+        finally:
+            conn.close()
+
+    def registrar_imagen_reenviada(self, telegram_id: int):
+        """Incrementa el contador de imágenes reenviadas para un usuario"""
+        conn = sqlite3.connect(self.db_path, timeout=30)
+        c = conn.cursor()
+        try:
+            # Agregar columna si no existe (migración segura)
+            try:
+                c.execute('ALTER TABLE usuarios ADD COLUMN imagenes_enviadas INTEGER DEFAULT 0')
+                conn.commit()
+            except Exception:
+                pass  # La columna ya existe
+
+            c.execute('''UPDATE usuarios SET imagenes_enviadas = COALESCE(imagenes_enviadas, 0) + 1
+                        WHERE telegram_id = ?''', (telegram_id,))
+            conn.commit()
+        except Exception as e:
+            logger.error(f"Error registrando imagen: {e}")
+        finally:
+            conn.close()
+
+    def obtener_estadisticas_simples(self) -> dict:
+        """Estadísticas simplificadas: solo usuarios e imágenes"""
+        conn = sqlite3.connect(self.db_path, timeout=30)
+        c = conn.cursor()
+        try:
+            c.execute('SELECT COUNT(*) FROM usuarios')
+            total_usuarios = c.fetchone()[0]
+
+            try:
+                c.execute('SELECT COALESCE(SUM(imagenes_enviadas), 0) FROM usuarios')
+                total_imagenes = c.fetchone()[0]
+            except Exception:
+                total_imagenes = 0
+
+            return {
+                'total_usuarios': total_usuarios,
+                'total_imagenes_reenviadas': total_imagenes
+            }
         finally:
             conn.close()
 
