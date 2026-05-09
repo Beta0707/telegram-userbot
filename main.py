@@ -9,12 +9,16 @@ import logging
 import os
 import json
 from dotenv import load_dotenv
-from anthropic import Anthropic
 
 from accounts import cargar_cuentas, conectar_cuenta, desconectar_todas
 from handlers import registrar_handler_texto, registrar_handler_media
 from database_completa import inicializar_bd
 from broadcast import worker_broadcast
+
+# Lazy import para Anthropic (evita problemas de httpcore)
+def get_ai_client(api_key):
+    from anthropic import Anthropic
+    return Anthropic(api_key=api_key)
 
 load_dotenv()
 
@@ -57,7 +61,7 @@ ACCOUNT_OFFSETS = {
 
 # ============= CLIENTES Y SERVICIOS =============
 
-ai_client = Anthropic(api_key=ANTHROPIC_KEY)
+ai_client = None
 db = inicializar_bd(DB_PATH)
 
 # Estado compartido entre las 3 cuentas
@@ -100,6 +104,8 @@ async def mostrar_estadisticas(db):
 async def main():
     """Inicia el userbot multi-cuenta (auto-run, sin menú interactivo)"""
 
+    global ai_client
+
     logger.info("=" * 60)
     logger.info("🤖 USERBOT MULTI-CUENTA CON IA ANTHROPIC")
     logger.info("=" * 60)
@@ -119,6 +125,16 @@ async def main():
 
     # Crear carpeta de logs si no existe
     os.makedirs('logs', exist_ok=True)
+
+    # Inicializar cliente de Anthropic (lazy import)
+    try:
+        ai_client = get_ai_client(ANTHROPIC_KEY)
+        logger.info("✅ Cliente Anthropic inicializado")
+    except Exception as e:
+        logger.error(f"❌ Error inicializando Anthropic: {e}")
+        logger.info("⏳ Esperando que se resuelva el problema...")
+        await asyncio.sleep(60)
+        return
 
     # Cargar cuentas desde .env (usa sesiones existentes automáticamente)
     cuentas = cargar_cuentas(API_ID, API_HASH)
