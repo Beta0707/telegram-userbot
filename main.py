@@ -18,6 +18,9 @@ from broadcast import worker_broadcast
 
 load_dotenv()
 
+# Crear carpeta de logs primero
+os.makedirs('logs', exist_ok=True)
+
 # ============= CONFIGURACIÓN DE LOGGING =============
 
 logging.basicConfig(
