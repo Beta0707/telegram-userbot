@@ -135,24 +135,36 @@ async def worker_broadcast(client, account_number: int, initial_delay_minutes: i
                         from_peer=group_media_id
                     )
                     exitosos += 1
-                    fallos_consecutivos = 0  # Resetear contador
+                    fallos_consecutivos = 0
                     logger.info(f"[{nombre_sesion}] ✅ Reenviado a: {group_name}")
-
-                    # Cooldown entre grupos
                     await asyncio.sleep(cooldown_minutes * 60)
 
                 except Exception as e:
                     fallos_consecutivos += 1
                     logger.warning(f"[{nombre_sesion}] ⚠️ Fallo en {group_name} ({fallos_consecutivos}/3): {e}")
 
-                    # Si hay 3 fallos consecutivos, esperar cooldown extra
-                    if fallos_consecutivos >= 3:
-                        logger.info(f"[{nombre_sesion}] ⏰ 3 fallos consecutivos. Esperando {cooldown_minutes}min...")
-                        await asyncio.sleep(cooldown_minutes * 60)
+                    # Reintentar una vez después de 5 segundos
+                    logger.info(f"[{nombre_sesion}] 🔄 Reintentando en 5 segundos...")
+                    await asyncio.sleep(5)
+
+                    try:
+                        await client.forward_messages(
+                            entity=group_id,
+                            messages=mensaje_imagen,
+                            from_peer=group_media_id
+                        )
+                        exitosos += 1
                         fallos_consecutivos = 0
-                    else:
-                        # Cooldown normal entre intentos
+                        logger.info(f"[{nombre_sesion}] ✅ Reenviado (reintento) a: {group_name}")
                         await asyncio.sleep(cooldown_minutes * 60)
+
+                    except Exception as retry_e:
+                        logger.warning(f"[{nombre_sesion}] ⚠️ Reintento falló en {group_name}: {retry_e}")
+
+                        if fallos_consecutivos >= 3:
+                            logger.info(f"[{nombre_sesion}] ⏰ 3 fallos consecutivos. Esperando {cooldown_minutes}min...")
+                            await asyncio.sleep(cooldown_minutes * 60)
+                            fallos_consecutivos = 0
 
             logger.info(f"[{nombre_sesion}] ✅ Ronda completa: {exitosos}/{len(grupos)} grupos")
 
